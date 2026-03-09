@@ -1,0 +1,60 @@
+---
+- name: Quản lý Full Flow Project
+  hosts: local
+  connection: local
+  vars:
+    app_version: "v7"
+    namespace: "default"
+
+  tasks:
+    # --- PHẦN KIỂM TRA HẠ TẦNG ---
+    - name: Kiểm tra trạng thái Minikube
+      command: minikube status
+      register: minikube_check
+      ignore_errors: yes
+
+    - name: Dừng lại nếu Minikube chưa chạy
+      fail:
+        msg: "Sếp ơi, Minikube chưa bật! Hãy chạy 'minikube start' trước nhé."
+      when: "'Stopped' in minikube_check.stdout"
+
+    - name: 1. Kiểm tra kết nối tới Cluster
+      kubernetes.core.k8s_info:
+        kind: Node
+      register: node_info
+
+    # --- PHẦN TRIỂN KHAI ỨNG DỤNG ---
+    - name: 2. Deploy MongoDB & RabbitMQ
+      kubernetes.core.k8s:
+        state: present
+        namespace: "{{ namespace }}"
+        src: "../k8s/{{ item }}.yaml"
+      loop:
+        - mongodb
+        - rabbitmq
+
+    - name: 3. Deploy API & Worker
+      kubernetes.core.k8s:
+        state: present
+        namespace: "{{ namespace }}"
+        src: "../k8s/{{ item }}.yaml"
+      loop:
+        - api
+        - worker
+    - name: 4. Đợi cho các Pod sẵn sàng (Health Check)
+      kubernetes.core.k8s_info:
+        kind: Pod
+        namespace: "{{ namespace }}"
+        label_selectors:
+          - "app={{ item }}"
+      register: pod_status
+      until: 
+        - pod_status.resources | length > 0
+        - pod_status.resources[0].status.phase == "Running"
+      retries: 10
+      delay: 5
+      loop:
+        - mongodb
+        - rabbitmq
+        - api-app
+        - worker-app
