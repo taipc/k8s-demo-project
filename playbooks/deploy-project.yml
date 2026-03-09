@@ -58,3 +58,18 @@
         - rabbitmq
         - api-app
         - worker-app
+    - name: 5. Lấy NodePort của API
+      shell: "kubectl get svc api-service -o jsonpath='{.spec.ports[0].nodePort}'"
+      register: api_nodeport
+
+    - name: 6. Lấy IP của Minikube
+      shell: "minikube ip"
+      register: minikube_ip
+    - name: 7. Tự động mở cổng kết nối (Port-forward)
+      shell: "nohup kubectl port-forward svc/api-service 8080:80 > /dev/null 2>&1 &"
+      async: 10
+      poll: 0
+    - name: Hiển thị địa chỉ truy cập
+      debug:
+        msg: "Sếp ơi, truy cập API tại đây: http://{{ minikube_ip.stdout }}:{{ api_nodeport.stdout }}"
+    
