@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: api-app-monitor
+  namespace: monitoring # Cùng namespace với Prometheus
+  labels:
+    release: my-monitor # Phải trùng với tên release Helm bạn đã đặt
+spec:
+  selector:
+    matchLabels:
+      app: api-app # Label của Service bạn muốn giám sát
+  namespaceSelector:
+    matchNames:
+      - default # Namespace nơi App đang chạy
+  endpoints:
+  - port: http # Tên port định nghĩa trong Service
+    path: /metrics # Đường dẫn lấy chỉ số
+    interval: 15s

@@ -1,0 +1,44 @@
+---
+- name: Deploy Full Flow Project to Kubernetes
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Đảm bảo MongoDB đang chạy
+      kubernetes.core.k8s:
+        state: present
+        src: ./k8s/mongodb.yaml
+
+    - name: Đảm bảo RabbitMQ đang chạy
+      kubernetes.core.k8s:
+        state: present
+        src: ./k8s/rabbitmq.yaml
+
+    - name: Triển khai API Service
+      kubernetes.core.k8s:
+        state: present
+        src: ./k8s/api.yaml
+
+    - name: Triển khai Worker App (Bản v7)
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: worker-app
+          spec:
+            replicas: 2 # Tự động scale lên 2 như bạn đã thử nghiệm
+            selector:
+              matchLabels:
+                app: worker-app
+            template:
+              metadata:
+                labels:
+                  app: worker-app
+              spec:
+                containers:
+                - name: worker
+                  image: my-worker:v7 # Dùng bản v7 có log "OK"
+                  env:
+                  - name: RABBITMQ_HOST
+                    value: "rabbitmq"

@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api-app
+  template:
+    metadata:
+      labels:
+        app: api-app
+    spec:
+      containers:
+      - name: api
+        image: my-api:v5
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5000
+        env:
+        - name: RABBITMQ_HOST
+          value: "rabbitmq"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-service
+spec:
+  type: NodePort
+  selector:
+    app: api-app
+  ports:
+    - name: http        # ĐÂY LÀ DÒNG QUAN TRỌNG: Để ServiceMonitor tìm thấy
+      protocol: TCP
+      port: 80          # Cổng của Service
+      targetPort: 5000  # Cổng thực tế mà App Go của bạn đang chạy
+   
