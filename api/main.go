@@ -87,6 +87,6 @@ func main() {
 		c.JSON(200, gin.H{"status": "Sent", "val": b.Msg})
 	})
 
-	// Chạy ở cổng 5000 tương ứng với containerPort trong Deployment
-	r.Run(":5000")
+	// Chạy ở cổng 5001 tương ứng với containerPort trong Deployment
+	r.Run(":5001")
 }

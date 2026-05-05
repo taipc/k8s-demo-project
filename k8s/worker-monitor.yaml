@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: worker-app-monitor
+  namespace: monitoring
+  labels:
+    # QUAN TRỌNG: Phải đổi thành monitoring-stack cho khớp với Playbook
+    release: monitoring-stack 
+spec:
+  selector:
+    matchLabels:
+      app: worker-app # Khớp với label trong worker.yaml
+  namespaceSelector:
+    matchNames:
+      - default
+  endpoints:
+  - port: metrics-port # Khớp với tên cổng sếp đặt là metrics-port
+    path: /metrics
+    interval: 15s

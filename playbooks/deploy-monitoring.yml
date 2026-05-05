@@ -1,0 +1,27 @@
+---
+- hosts: localhost
+  tasks:
+    - name: 1. Thêm kho lưu trữ Prometheus Community
+      shell: "helm repo add prometheus-community https://prometheus-community.github.io/helm-charts"
+
+    - name: 2. Cập nhật dữ liệu từ các Repo
+      shell: "helm repo update"
+
+    - name: 3. Triển khai Kube-Prometheus-Stack bằng Helm
+      shell: "helm upgrade --install monitoring-stack prometheus-community/kube-prometheus-stack -n monitoring --create-namespace"
+      
+    - name: 4. Dọn dẹp Port-forward cũ (nếu có)
+      shell: "pkill -f 'kubectl port-forward svc/monitoring-stack-grafana'"
+      ignore_errors: yes
+
+    - name: 5. Mở cổng vào Grafana (Localhost:3000)
+      shell: "nohup kubectl port-forward svc/monitoring-stack-grafana 3000:80 -n monitoring > /dev/null 2>&1 &"
+      async: 10
+      poll: 0
+
+    - name: 6. Hiển thị thông tin truy cập
+      debug:
+        msg: 
+          - "Prometheus & Grafana đã sẵn sàng!"
+          - "Truy cập Grafana tại: http://localhost:3000"
+          - "User: admin | Pass mặc định: prom-operator"

@@ -5,13 +5,21 @@ import (
 	"log"
 	"os"
 	"time"
-
+	"net/http"
 	amqp "github.com/rabbitmq/amqp091-go" 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
+	// 0. Mở một cổng riêng để Prometheus vào lấy dữ liệu (Scrape)
+
+	go func() {
+		http.Handle("/metrics", promhttp.Handler())
+		log.Println("Prometheus Metrics đang mở tại cổng :8082/metrics")
+		http.ListenAndServe(":8082", nil)
+	}()
 	// 1. Kết nối MongoDB
 	mongoURI := os.Getenv("MONGO_URI")
 	if mongoURI == "" {
@@ -62,7 +70,7 @@ func main() {
 
 	// 4. Vòng lặp nhận thư và lưu vào DB
 	forever := make(chan bool)
-
+	
 	go func() {
 		for d := range msgs {
 			log.Printf("Received: %s", d.Body)

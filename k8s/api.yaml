@@ -14,10 +14,10 @@ spec:
     spec:
       containers:
       - name: api
-        image: my-api:v5
+        image: my-api:v6
         imagePullPolicy: Never
         ports:
-        - containerPort: 5000
+        - containerPort: 5001
         env:
         - name: RABBITMQ_HOST
           value: "rabbitmq"
@@ -33,6 +33,6 @@ spec:
   ports:
     - name: http        # ĐÂY LÀ DÒNG QUAN TRỌNG: Để ServiceMonitor tìm thấy
       protocol: TCP
-      port: 80          # Cổng của Service
-      targetPort: 5000  # Cổng thực tế mà App Go của bạn đang chạy
+      port: 90          # Cổng của Service
+      targetPort: 5001  # Cổng thực tế mà App Go của bạn đang chạy
    

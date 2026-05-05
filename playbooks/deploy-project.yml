@@ -46,7 +46,8 @@
         kind: Pod
         namespace: "{{ namespace }}"
         label_selectors:
-          - "app={{ item }}"
+          - "app={{ 
+           }}"
       register: pod_status
       until: 
         - pod_status.resources | length > 0
@@ -66,7 +67,7 @@
       shell: "minikube ip"
       register: minikube_ip
     - name: 7. Tự động mở cổng kết nối (Port-forward)
-      shell: "nohup kubectl port-forward svc/api-service 8080:80 > /dev/null 2>&1 &"
+      shell: "nohup kubectl port-forward svc/api-service 8080:90 > /dev/null 2>&1 &"
       async: 10
       poll: 0
     - name: Hiển thị địa chỉ truy cập

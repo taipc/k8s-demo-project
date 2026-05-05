@@ -4,7 +4,7 @@ metadata:
   name: api-app-monitor
   namespace: monitoring # Cùng namespace với Prometheus
   labels:
-    release: my-monitor # Phải trùng với tên release Helm bạn đã đặt
+    release: monitoring-stack # Phải trùng với tên release Helm bạn đã đặt
 spec:
   selector:
     matchLabels:
